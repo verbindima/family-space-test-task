@@ -1,0 +1,112 @@
+swagger: "2.0"
+info:
+  title: Messages API
+  description: API for posts and comments
+  version: 1.0.0
+host: localhost:3000
+basePath: /
+schemes:
+  - http
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+security:
+  - Bearer: []
+
+paths:
+  /posts:
+    post:
+      summary: Create a new post
+      security:
+        - Bearer: []
+      parameters:
+        - name: groupId 
+          in: query
+          required: true
+          type: integer
+        - name: text
+          in: query
+          required: true
+          type: string
+      responses:
+        200:
+          description: Post created
+          schema:
+            $ref: '#/definitions/Post'
+  /posts/{groupId}:
+    get:
+      summary: Get all posts for a group
+      security:
+        - Bearer: []
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Posts fetched
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Post'
+  /comments:
+    post:
+      summary: Create a new comment
+      security:
+        - Bearer: []
+      parameters:
+        - name: postId
+          in: query
+          required: true
+          type: integer
+        - name: text
+          in: query 
+          required: true
+          type: string
+      responses:
+        200:
+          description: Comment created
+          schema:
+            $ref: '#/definitions/Comment'
+  /comments/{postId}:
+    get:
+      summary: Get all comments for a post
+      security:
+        - Bearer: []
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          type: integer
+      responses:
+        200:
+          description: Comments fetched
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Comment'
+              
+definitions:
+  Post:
+    type: object
+    properties:
+      id:
+        type: integer
+      text:
+        type: string
+      createdBy:
+        type: integer
+      commentsCount:
+        type: integer
+  Comment:
+    type: object 
+    properties:
+      id:
+        type: integer
+      text:
+        type: string
+      createdBy: 
+        type: integer
