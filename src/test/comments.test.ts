@@ -6,6 +6,11 @@ import { CommentRoute } from '@/routes/comments.route';
 import { CreateCommentDto } from '@/dtos/comments.dto';
 import { sign } from 'jsonwebtoken';
 
+let authorizationToken: string;
+beforeAll(async () => {
+  authorizationToken = sign({ id: 1, groupIds: [1] }, JWT_SECRET_KEY, { expiresIn: '1h' });
+});
+
 afterAll(async () => {
   await new Promise<void>(resolve => setTimeout(() => resolve(), 500));
   pg.end();
@@ -16,20 +21,18 @@ describe('Testing Comments', () => {
     it('response statusCode 200 / findByPostId', async () => {
       const commentsRoute = new CommentRoute();
       const app = new App([commentsRoute]);
-      const token = sign({ id: 1, groupIds: [1] }, JWT_SECRET_KEY, { expiresIn: '1h' });
       const postId = 1;
 
-      return await request(app.getServer()).get(`${commentsRoute.path}/${postId}`).auth(token, { type: 'bearer' }).expect(200);
+      return await request(app.getServer()).get(`${commentsRoute.path}/${postId}`).auth(authorizationToken, { type: 'bearer' }).expect(200);
     });
     it('response statusCode 404 / not found', async () => {
       const commentsRoute = new CommentRoute();
       const app = new App([commentsRoute]);
-      const token = sign({ id: 1, groupIds: [1] }, JWT_SECRET_KEY, { expiresIn: '1h' });
       const postId = 101;
 
-      return await request(app.getServer()).get(`${commentsRoute.path}/${postId}`).auth(token, { type: 'bearer' }).expect(404);
+      return await request(app.getServer()).get(`${commentsRoute.path}/${postId}`).auth(authorizationToken, { type: 'bearer' }).expect(404);
     });
-    it('response statusCode 401 / unauthorized', async () => {
+    it('response statusCode 401 / unauthorized (invalid token)', async () => {
       const commentsRoute = new CommentRoute();
       const app = new App([commentsRoute]);
       const invalidToken = sign({ id: 1, groupIds: [1] }, 'JWT_SECRET_KEY1', { expiresIn: '1h' });
@@ -47,11 +50,10 @@ describe('Testing Comments', () => {
       };
       const commentsRoute = new CommentRoute();
       const app = new App([commentsRoute]);
-      const token = sign({ id: 1, groupIds: [1] }, JWT_SECRET_KEY, { expiresIn: '1h' });
 
-      return await request(app.getServer()).post(`${commentsRoute.path}`).auth(token, { type: 'bearer' }).send(commentData).expect(201);
+      return await request(app.getServer()).post(`${commentsRoute.path}`).auth(authorizationToken, { type: 'bearer' }).send(commentData).expect(201);
     });
-    it('response statusCode 401 / unauthorized', async () => {
+    it('response statusCode 401 / unauthorized (missing token)', async () => {
       const commentData: CreateCommentDto = {
         postId: 1,
         text: 'text',
@@ -68,9 +70,8 @@ describe('Testing Comments', () => {
       };
       const commentsRoute = new CommentRoute();
       const app = new App([commentsRoute]);
-      const token = sign({ id: 1, groupIds: [1] }, JWT_SECRET_KEY, { expiresIn: '1h' });
 
-      return await request(app.getServer()).post(`${commentsRoute.path}`).auth(token, { type: 'bearer' }).send(commentData).expect(400);
+      return await request(app.getServer()).post(`${commentsRoute.path}`).auth(authorizationToken, { type: 'bearer' }).send(commentData).expect(400);
     });
 
     it('response statusCode 404 / Post not found', async () => {
@@ -80,9 +81,8 @@ describe('Testing Comments', () => {
       };
       const commentsRoute = new CommentRoute();
       const app = new App([commentsRoute]);
-      const token = sign({ id: 1, groupIds: [1] }, JWT_SECRET_KEY, { expiresIn: '1h' });
 
-      return await request(app.getServer()).post(`${commentsRoute.path}`).auth(token, { type: 'bearer' }).send(commentData).expect(404);
+      return await request(app.getServer()).post(`${commentsRoute.path}`).auth(authorizationToken, { type: 'bearer' }).send(commentData).expect(404);
     });
   });
 });
