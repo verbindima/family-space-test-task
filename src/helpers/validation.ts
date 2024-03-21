@@ -1,17 +1,17 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, ClassConstructor } from 'class-transformer';
 import { validate, ValidationError } from 'class-validator';
 
-export const validatorDto = async (data: any, type: any): Promise<ValidationError[]> => {
+export const validatorDto = async <T, V>(data: V, type: ClassConstructor<T>): Promise<ValidationError[]> => {
   const dto = plainToInstance(type, data);
-  const errors = await validate(dto);
+  const errors = await validate(dto as object);
   return errors;
 };
 
-export const validatorArrayDto = async (dataArray: any[], type: any): Promise<ValidationError[]> => {
-  const dto: Array<any> = plainToInstance(type, dataArray);
+export const validatorArrayDto = async <T, V>(dataArray: V[], type: ClassConstructor<T>): Promise<ValidationError[]> => {
+  const dto = plainToInstance(type, dataArray);
   let errors: ValidationError[] = [];
   for (const data of dto) {
-    errors = errors.concat(await validate(data));
+    errors = errors.concat(await validate(data as object));
   }
   return errors;
 };
