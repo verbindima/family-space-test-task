@@ -69,8 +69,7 @@ export class PostService {
         "id",
         "text",
         group_id as "groupId",
-        created_by as "createdBy",
-        (SELECT COUNT(*) FROM comments WHERE post_id = "id") as "commentsCount"
+        created_by as "createdBy"
       `,
       [text, groupId, createdBy],
     );
